@@ -19,11 +19,15 @@ connectDB();
 
 const app = express();
 const port = process.env.PORT || 5000;
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true
   })
 );
@@ -33,6 +37,10 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 150 }));
 
 app.get("/", (req, res) => {
   res.json({ message: "TechMart Admin API is running." });
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", service: "techmart-admin-api" });
 });
 
 app.use("/api/auth", authRoutes);
